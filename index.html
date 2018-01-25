@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset=utf-8 />
+	<title>Leaflet Lab 07 Template</title>
+	<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+
+	<link href="https://fonts.googleapis.com/css?family=Noto+Sans" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Lora" rel="stylesheet">
+
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+			font-family: "Noto Sans", sans-serif;
+			color: #3d3d3d;
+		}
+
+		h1 {
+			position: absolute;
+			margin-top: 0;
+			top: 10px;
+			left: 100px;
+			font-size: 2em;
+			font-family: "Lora", serif;
+			letter-spacing: .04em;
+			padding: 10px 15px;
+			background: rgba(256, 256, 256, .4);
+			border: 1px solid grey;
+			border-radius: 3px;
+			z-index: 800;
+		}
+
+		h2 {
+			font-family: "Lora", serif;
+			letter-spacing: .04em;
+		}
+
+		#map {
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			width: 100%;
+		}
+
+		#about {
+			position: absolute;
+			bottom: 20px;
+			left: 15px;
+			width: 280px;
+			padding: 0 15px;
+			background: rgba(256, 256, 256, .4);
+			border: 1px solid grey;
+			border-radius: 3px;
+			z-index: 800;
+		}
+
+		p {
+			font-size: .9em;
+			line-height: 1.5em;
+		}
+
+		a {
+			color: #005daa;
+			text-decoration: none;
+		}
+
+		a:hover {
+			text-decoration: underline;
+		}
+	</style>
+</head>
+
+<body>
+
+	<h1>Old Route Home from GeoJob!</h1>
+
+	<div id='map'></div>
+
+	<section id="about">
+		<h2>about this map</h2>
+		<p> The <a href="https://naturepreserves.ky.gov">Kentucky State Nature Preserves Commission</a> is located at 801 Teton Trail in Frankfort, KY (formerly 801 Schenkel). Across the road from us is Circle K, where sometimes people that are shot go to get rescued.
+			</p>
+		<p>My drive home consists of passing through the Indian Hills neighborhood. I enjoy a serene drive on US 460 where I pass by the Forks of the Elkhorn and then continue through some nice farmland until I make a stop at the Midway Corner Grocery where I
+			refill my RTIC mug with diet Mountain Dew and the cashier begrudgingly charges full price because "NO REFILLS!".</p>
+		<p>Map authored by Ian Horn</p>
+	</section>
+
+	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+	<script src="data/route.js"></script>
+	<!--adding route.js -->
+	<script>
+		var options = {
+			center: [38.210097, -84.754042],
+			zoom: 12
+		}
+		//console.log(routeData); // output will be our GeoJSON object
+
+		var map = L.map('map', options);
+
+		L.control.zoom({
+			position: 'topright'
+		}).addTo(map);
+		var tiles = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+			attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+			subdomains: 'abcd',
+			maxZoom: 22
+		}).addTo(map);
+
+		var myRoute = L.geoJson(routeData, {
+
+			filter: function(feature) {
+				if (feature.geometry.type == "LineString") {
+					return feature;
+
+				}
+			},
+			style: function(feature) {
+
+				return {
+					color: "#005DAA",
+					weight: 3,
+					opacity: .5,
+					dashArray: "11, 11"
+				}
+			}
+
+		}).addTo(map);
+
+
+
+
+		var myStops = L.geoJson(routeData, {
+
+			filter: function(feature) {
+				if (feature.geometry.type == "Point") {
+					return feature;
+				}
+			},
+			onEachFeature: function(feature, layer) {
+
+				layer.bindTooltip(feature.properties.name); //replace the console.log.
+
+				layer.on('click', function() {
+					map.setView(layer.getLatLng(), 16)
+				});
+			}
+
+		}).addTo(map);
+
+		var coords = L.latLng(myStops); //create a L.latLng event for markers
+
+		myRoute.on('mouseover', function(e) {
+			myRoute.setStyle({
+				color: 'red'
+			});
+		});
+
+		myRoute.on('mouseout', function(e) {
+			myRoute.setStyle({
+				color: "#005DAA"
+			});
+		});
+	</script>
+
+</body>
+
+</html>
